@@ -8,16 +8,25 @@ import { Loader2 } from 'lucide-react';
 
 export default function SignIn() {
     const router = useRouter();
-    const { status } = useSession();
+    const { status, data: session } = useSession();
     const [data, setData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (status === 'authenticated') {
+            console.log("Logged in, redirecting from SignIn to Dashboard...");
             router.push('/dashboard');
         }
     }, [status, router]);
+
+    if (status === 'loading') {
+        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Loading session...</div>;
+    }
+
+    if (status === 'authenticated') {
+        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Already signed in. Redirecting...</div>;
+    }
 
     const loginUser = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,7 +43,7 @@ export default function SignIn() {
                 throw new Error('Invalid email or password');
             }
 
-            router.push('/dashboard');
+            // The useEffect will handle redirect to dashboard once status changes to 'authenticated'
         } catch (err: any) {
             setError(err.message);
         } finally {

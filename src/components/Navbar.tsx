@@ -27,7 +27,7 @@ export default function Navbar() {
                             </button>
                         </>
                     ) : (
-                        <Link href="/api/auth/signin" className="btn-primary">
+                        <Link href="/auth/signin" className="btn-primary">
                             Sign In
                         </Link>
                     )}
