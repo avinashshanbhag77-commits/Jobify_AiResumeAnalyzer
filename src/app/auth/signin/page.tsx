@@ -14,18 +14,11 @@ export default function SignIn() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (status === 'authenticated') {
-            console.log("Session verified on SignIn page. Redirecting...");
-            router.replace('/dashboard');
-            // Hard fallback for Vercel
-            const timeout = setTimeout(() => {
-                if (window.location.pathname.includes('signin')) {
-                    window.location.href = '/dashboard';
-                }
-            }, 2000);
-            return () => clearTimeout(timeout);
+        if (status === 'authenticated' || session?.user) {
+            console.log("Active session detected. Forcing redirect to Dashboard...");
+            window.location.replace('/dashboard');
         }
-    }, [status, router]);
+    }, [status, session]);
 
     if (status === 'loading') {
         return <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>

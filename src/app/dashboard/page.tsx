@@ -13,37 +13,14 @@ export default function Dashboard() {
     const [analysisData, setAnalysisData] = useState<any>(null);
 
     useEffect(() => {
-        console.log("Dashboard mount - status:", status, "session:", !!session);
+        console.log("Dashboard visibility check - Status:", status, "User:", !!session?.user);
     }, [status, session]);
-
-    // If session is loading, show loading spinner
-    if (status === 'loading') {
-        return <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
-            <h2>Connecting to your dashboard...</h2>
-            <p style={{ color: '#888', marginTop: '1rem' }}>Please wait while we sync your session</p>
-            <div className="loader" style={{ marginTop: '2rem' }}></div>
-        </div>;
-    }
-
-    // Force rendering if we have session.user even if status is weird
-    const isAuthenticated = status === 'authenticated' || (status === 'unauthenticated' && !!session?.user);
-
-    if (!isAuthenticated) {
-        console.log("Dashboard protection: Session missing. Status:", status);
-        return (
-            <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
-                <h2>Session Expired or Missing</h2>
-                <p>Please sign in to access your resumes.</p>
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
-                    <Link href="/auth/signin" className="btn-primary">Sign In</Link>
-                    <Link href="/" className="btn-secondary">Back Home</Link>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="container" style={{ paddingBottom: '4rem' }}>
+            {status === 'loading' && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '3px', background: 'var(--primary)', zIndex: 1000 }}></div>
+            )}
             <div className="dashboard-header">
                 <div>
                     <h1>Welcome, {session?.user?.name || 'User'}</h1>
