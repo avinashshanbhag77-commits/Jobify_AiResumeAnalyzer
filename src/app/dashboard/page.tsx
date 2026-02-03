@@ -1,22 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import UploadForm from '@/components/UploadForm';
 import AnalysisDisplay from '@/components/AnalysisDisplay';
 import ResumeHistory from '@/components/ResumeHistory';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
+    const router = useRouter();
     const [analysisData, setAnalysisData] = useState<any>(null);
 
-    if (status === 'loading') {
-        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Loading...</div>;
-    }
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/auth/signin');
+        }
+    }, [status, router]);
 
-    if (status === 'unauthenticated') {
-        redirect('/api/auth/signin');
+    if (status === 'loading' || status === 'unauthenticated') {
+        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Loading...</div>;
     }
 
     return (
