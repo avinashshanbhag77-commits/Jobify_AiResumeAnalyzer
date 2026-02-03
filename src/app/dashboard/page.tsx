@@ -9,17 +9,21 @@ import ResumeHistory from '@/components/ResumeHistory';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
-    const router = useRouter();
     const [analysisData, setAnalysisData] = useState<any>(null);
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            router.push('/auth/signin');
-        }
-    }, [status, router]);
+    // If session is loading, show loading spinner
+    if (status === 'loading') {
+        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Loading your dashboard...</div>;
+    }
 
-    if (status === 'loading' || status === 'unauthenticated') {
-        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Loading...</div>;
+    // If no session after loading, show a message instead of a silent redirect (middleware handles security)
+    if (!session) {
+        return (
+            <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
+                <h2>Please sign in to access your dashboard.</h2>
+                <a href="/auth/signin" className="btn-primary" style={{ marginTop: '1rem' }}>Sign In</a>
+            </div>
+        );
     }
 
     return (

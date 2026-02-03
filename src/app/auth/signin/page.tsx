@@ -35,17 +35,17 @@ export default function SignIn() {
 
         try {
             const result = await signIn('credentials', {
-                ...data,
-                redirect: false,
+                email: data.email,
+                password: data.password,
+                callbackUrl: '/dashboard',
+                redirect: true, // Let NextAuth handle the redirect
             });
 
             if (result?.error) {
-                throw new Error('Invalid email or password');
+                setError('Invalid email or password');
             }
-
-            // The useEffect will handle redirect to dashboard once status changes to 'authenticated'
         } catch (err: any) {
-            setError(err.message);
+            setError('Something went wrong. Please try again.');
         } finally {
             setLoading(false);
         }
