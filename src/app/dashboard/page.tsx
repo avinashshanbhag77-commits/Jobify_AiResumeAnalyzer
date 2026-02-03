@@ -16,11 +16,10 @@ export default function Dashboard() {
 
     useEffect(() => {
         setMounted(true);
-        console.log("Dashboard Mounted - Status:", status, "User:", !!session?.user);
-    }, [status, session]);
+    }, []);
 
-    // Prevent hydration mismatch
-    if (!mounted) return null;
+    // We render even if not mounted to avoid blank pages, but use a subtle opacity to hide hydration flicker
+    const renderStyle = mounted ? { opacity: 1 } : { opacity: 0 };
 
     return (
         <div className="container" style={{ paddingBottom: '4rem', minHeight: '100vh' }}>

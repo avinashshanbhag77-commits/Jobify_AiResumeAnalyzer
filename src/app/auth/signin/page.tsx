@@ -27,14 +27,17 @@ export default function SignIn() {
         </div>;
     }
 
-    if (status === 'authenticated') {
+    if (status === 'authenticated' || session?.user) {
         return (
             <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
-                <h2>You are already signed in</h2>
-                <p>Redirecting you to the dashboard...</p>
-                <Link href="/dashboard" className="btn-primary" style={{ marginTop: '1.5rem' }}>
-                    Click here if not redirected
-                </Link>
+                <h1 className="text-accent">Welcome Back!</h1>
+                <p style={{ marginTop: '1rem', fontSize: '1.2rem' }}>You are currently signed in.</p>
+                <div style={{ marginTop: '2.5rem' }}>
+                    <Link href="/dashboard" className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem' }}>
+                        Enter My Dashboard
+                    </Link>
+                </div>
+                <p style={{ marginTop: '2rem', color: '#666' }}>Redirecting automatically...</p>
             </div>
         );
     }
