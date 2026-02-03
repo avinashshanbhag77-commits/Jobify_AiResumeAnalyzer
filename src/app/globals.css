@@ -11,6 +11,9 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --font-geist-sans: 'Inter', sans-serif;
   --font-geist-mono: 'Roboto Mono', monospace;
+  --surface: #1a1a1a;
+  --border: #333;
+  --radius: 8px;
 }
 
 body {
