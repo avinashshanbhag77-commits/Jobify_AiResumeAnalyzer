@@ -14,6 +14,7 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        console.log("Register status:", status);
         if (status === 'authenticated') {
             router.push('/dashboard');
         }

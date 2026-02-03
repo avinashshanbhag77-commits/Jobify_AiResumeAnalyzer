@@ -11,17 +11,26 @@ export default function Dashboard() {
     const { data: session, status } = useSession();
     const [analysisData, setAnalysisData] = useState<any>(null);
 
+    useEffect(() => {
+        console.log("Dashboard mount - status:", status, "session:", !!session);
+    }, [status, session]);
+
     // If session is loading, show loading spinner
     if (status === 'loading') {
-        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Loading your dashboard...</div>;
+        return <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
+            <h2>Connecting to your dashboard...</h2>
+            <div className="loader"></div>
+        </div>;
     }
 
-    // If no session after loading, show a message instead of a silent redirect (middleware handles security)
-    if (!session) {
+    // Comprehensive check for authenticated session
+    if (status === 'unauthenticated' || !session?.user) {
+        console.log("Redirecting to sign-in from dashboard due to missing session");
         return (
-            <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
-                <h2>Please sign in to access your dashboard.</h2>
-                <a href="/auth/signin" className="btn-primary" style={{ marginTop: '1rem' }}>Sign In</a>
+            <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
+                <h2>Session missing or expired</h2>
+                <p>Please sign in to continue.</p>
+                <a href="/auth/signin" className="btn-primary" style={{ marginTop: '1.5rem' }}>Sign In Now</a>
             </div>
         );
     }
