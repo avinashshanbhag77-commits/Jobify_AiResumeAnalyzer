@@ -18,16 +18,18 @@ export default function Dashboard() {
         setMounted(true);
     }, []);
 
-    // We render even if not mounted to avoid blank pages, but use a subtle opacity to hide hydration flicker
-    const renderStyle = mounted ? { opacity: 1 } : { opacity: 0 };
-
     return (
-        <div className="container" style={{ ...renderStyle, paddingBottom: '4rem', minHeight: '100vh', transition: 'opacity 0.5s' }}>
+        <div className="container" style={{ paddingBottom: '4rem', minHeight: '100vh', display: 'block' }}>
+            {/* FORCE VISIBLE DEBUG MARKER */}
+            <div style={{ background: '#6366f1', color: 'white', padding: '5px', textAlign: 'center', fontSize: '10px', borderRadius: '4px', marginBottom: '1rem' }}>
+                DASHBOARD ACTIVE - v2.2.0
+            </div>
+
             {status === 'loading' && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '4px', background: 'var(--primary)', zIndex: 1000, animation: 'pulse 1.5s infinite' }}></div>
             )}
 
-            <div style={{ fontSize: '0.6rem', color: '#333', textAlign: 'right', marginBottom: '-1rem' }}>v2.1.0-live</div>
+            <div style={{ fontSize: '0.6rem', color: '#666', textAlign: 'right', marginBottom: '-1rem' }}>v2.2.0-master</div>
 
             <div className="dashboard-header" style={{ alignItems: 'flex-start' }}>
                 <div>

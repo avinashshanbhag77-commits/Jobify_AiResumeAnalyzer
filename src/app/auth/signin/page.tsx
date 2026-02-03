@@ -33,9 +33,13 @@ export default function SignIn() {
                 <h1 className="text-accent">Welcome Back!</h1>
                 <p style={{ marginTop: '1rem', fontSize: '1.2rem' }}>You are currently signed in.</p>
                 <div style={{ marginTop: '2.5rem' }}>
-                    <Link href="/dashboard" className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem' }}>
-                        Enter My Dashboard
-                    </Link>
+                    <button
+                        onClick={() => window.location.href = '/dashboard'}
+                        className="btn-primary"
+                        style={{ padding: '1rem 3rem', fontSize: '1.2rem', cursor: 'pointer' }}
+                    >
+                        Enter My Dashboard (Force Load)
+                    </button>
                 </div>
                 <p style={{ marginTop: '2rem', color: '#666' }}>Redirecting automatically...</p>
             </div>
