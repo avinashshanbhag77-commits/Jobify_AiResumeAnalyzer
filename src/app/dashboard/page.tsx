@@ -23,15 +23,24 @@ export default function Dashboard() {
     if (!mounted) return null;
 
     return (
-        <div className="container" style={{ paddingBottom: '4rem' }}>
+        <div className="container" style={{ paddingBottom: '4rem', minHeight: '100vh' }}>
             {status === 'loading' && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '3px', background: 'var(--primary)', zIndex: 1000 }}></div>
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '4px', background: 'var(--primary)', zIndex: 1000, animation: 'pulse 1.5s infinite' }}></div>
             )}
-            <div className="dashboard-header">
+
+            <div className="dashboard-header" style={{ alignItems: 'flex-start' }}>
                 <div>
-                    <h1>Welcome, {session?.user?.name || 'User'}</h1>
+                    <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome, {session?.user?.name || 'User'}</h1>
                     <p style={{ color: '#888' }}>Ready to optimize your career?</p>
                 </div>
+                {status === 'unauthenticated' && (
+                    <div className="card" style={{ padding: '1rem', border: '1px solid var(--error)', background: 'rgba(239, 68, 68, 0.1)' }}>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--error)' }}>
+                            Session not detected. If you just signed in, try
+                            <button onClick={() => window.location.reload()} style={{ marginLeft: '5px', textDecoration: 'underline', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}>refreshing</button>.
+                        </p>
+                    </div>
+                )}
             </div>
 
             <div className="dashboard-grid">
