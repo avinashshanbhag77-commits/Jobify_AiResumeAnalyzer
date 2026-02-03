@@ -10,11 +10,17 @@ import ResumeHistory from '@/components/ResumeHistory';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
+    const router = useRouter();
     const [analysisData, setAnalysisData] = useState<any>(null);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        console.log("Dashboard visibility check - Status:", status, "User:", !!session?.user);
+        setMounted(true);
+        console.log("Dashboard Mounted - Status:", status, "User:", !!session?.user);
     }, [status, session]);
+
+    // Prevent hydration mismatch
+    if (!mounted) return null;
 
     return (
         <div className="container" style={{ paddingBottom: '4rem' }}>
