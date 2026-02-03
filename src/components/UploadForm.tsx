@@ -9,6 +9,7 @@ interface UploadFormProps {
 }
 
 export default function UploadForm({ onAnalysisComplete }: UploadFormProps) {
+    const roles = JOB_ROLES || [];
     const [isDragOver, setIsDragOver] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedRole, setSelectedRole] = useState('');
@@ -112,7 +113,7 @@ export default function UploadForm({ onAnalysisComplete }: UploadFormProps) {
                     }}
                 >
                     <option value="">-- Choose a Role --</option>
-                    {JOB_ROLES.map((role) => (
+                    {roles.map((role) => (
                         <option key={role} value={role}>{role}</option>
                     ))}
                 </select>
