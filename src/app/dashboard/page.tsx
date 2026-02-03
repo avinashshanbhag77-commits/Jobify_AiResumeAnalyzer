@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import UploadForm from '@/components/UploadForm';
 import AnalysisDisplay from '@/components/AnalysisDisplay';
 import ResumeHistory from '@/components/ResumeHistory';
