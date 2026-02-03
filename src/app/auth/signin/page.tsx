@@ -15,17 +15,35 @@ export default function SignIn() {
 
     useEffect(() => {
         if (status === 'authenticated') {
-            console.log("Logged in, redirecting from SignIn to Dashboard...");
-            router.push('/dashboard');
+            console.log("Session verified on SignIn page. Redirecting...");
+            router.replace('/dashboard');
+            // Hard fallback for Vercel
+            const timeout = setTimeout(() => {
+                if (window.location.pathname.includes('signin')) {
+                    window.location.href = '/dashboard';
+                }
+            }, 2000);
+            return () => clearTimeout(timeout);
         }
     }, [status, router]);
 
     if (status === 'loading') {
-        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Loading session...</div>;
+        return <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
+            <h2>Syncing Session...</h2>
+            <div className="loader"></div>
+        </div>;
     }
 
     if (status === 'authenticated') {
-        return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>Already signed in. Redirecting...</div>;
+        return (
+            <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
+                <h2>You are already signed in</h2>
+                <p>Redirecting you to the dashboard...</p>
+                <Link href="/dashboard" className="btn-primary" style={{ marginTop: '1.5rem' }}>
+                    Click here if not redirected
+                </Link>
+            </div>
+        );
     }
 
     const loginUser = async (e: React.FormEvent) => {

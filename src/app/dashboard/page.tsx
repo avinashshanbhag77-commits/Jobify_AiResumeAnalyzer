@@ -19,18 +19,24 @@ export default function Dashboard() {
     if (status === 'loading') {
         return <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
             <h2>Connecting to your dashboard...</h2>
-            <div className="loader"></div>
+            <p style={{ color: '#888', marginTop: '1rem' }}>Please wait while we sync your session</p>
+            <div className="loader" style={{ marginTop: '2rem' }}></div>
         </div>;
     }
 
-    // Comprehensive check for authenticated session
-    if (status === 'unauthenticated' || !session?.user) {
-        console.log("Redirecting to sign-in from dashboard due to missing session");
+    // Force rendering if we have session.user even if status is weird
+    const isAuthenticated = status === 'authenticated' || (status === 'unauthenticated' && !!session?.user);
+
+    if (!isAuthenticated) {
+        console.log("Dashboard protection: Session missing. Status:", status);
         return (
             <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
-                <h2>Session missing or expired</h2>
-                <p>Please sign in to continue.</p>
-                <a href="/auth/signin" className="btn-primary" style={{ marginTop: '1.5rem' }}>Sign In Now</a>
+                <h2>Session Expired or Missing</h2>
+                <p>Please sign in to access your resumes.</p>
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
+                    <Link href="/auth/signin" className="btn-primary">Sign In</Link>
+                    <Link href="/" className="btn-secondary">Back Home</Link>
+                </div>
             </div>
         );
     }
