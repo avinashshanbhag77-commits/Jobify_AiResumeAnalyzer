@@ -1,0 +1,137 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import dbConnect from '@/lib/db';
+import Resume from '@/models/Resume';
+const pdfParse = require('pdf-parse');
+import OpenAI from 'openai';
+
+// Lazy initialization prevents top-level crashes if env vars are missing/invalid on module load
+let openai: OpenAI | null = null;
+
+function getOpenAIClient() {
+    if (!openai) {
+        const apiKey = process.env.OPENAI_API_KEY;
+        const baseURL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+
+        console.log('Initializing OpenAI Client...');
+        console.log('Base URL:', baseURL);
+        console.log('API Key Present:', !!apiKey);
+
+        if (!apiKey) {
+            throw new Error('OPENAI_API_KEY is not defined');
+        }
+
+        openai = new OpenAI({
+            apiKey: apiKey,
+            baseURL: baseURL,
+            defaultHeaders: {
+                'HTTP-Referer': process.env.NEXTAUTH_URL || 'http://localhost:3000',
+                'X-Title': 'Jobify AI Resume Analyzer',
+            },
+        });
+    }
+    return openai;
+}
+
+export async function POST(req: Request) {
+    console.log('--- Analyze Request Started ---');
+    try {
+        // 1. Auth Check
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            console.log('Unauthorized request');
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        // 2. Form Data Handling
+        const formData = await req.formData();
+        const file = formData.get('file') as File;
+        const jobRole = formData.get('jobRole') as string;
+
+        if (!file) {
+            console.log('No file uploaded');
+            return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
+        }
+
+        console.log('File received:', file.name, 'Size:', file.size, 'Target Role:', jobRole);
+
+        // 3. File Conversion
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // 4. PDF Parsing
+        let pdfText = '';
+        try {
+            console.log('Parsing PDF...');
+            const data = await pdfParse(buffer);
+            pdfText = data.text;
+            console.log('PDF Parsed. Length:', pdfText.length);
+        } catch (error) {
+            console.error('PDF Parse Error:', error);
+            return NextResponse.json({ message: 'Failed to parse PDF file. Is it a valid PDF?' }, { status: 500 });
+        }
+
+        // 5. AI Analysis
+        console.log('Starting AI Analysis for role:', jobRole);
+        const prompt = `
+      Analyze the following resume content specifically for the role of "${jobRole || 'General Professional'}".
+      
+      Resume Content:
+      ${pdfText.substring(0, 3000)} // Truncate to avoid token limits
+
+      Return the response in strictly valid JSON format with the following structure:
+      {
+        "score": number (0-100) - evaluate how well the candidate matches the ${jobRole} position,
+        "summary": "Professional summary of the candidate and their fit for the ${jobRole} role (max 3 sentences)",
+        "strengths": ["strength 1 relevant to ${jobRole}", "strength 2", ...],
+        "weaknesses": ["missing skills/experience for ${jobRole}", "weakness 2", ...],
+        "improvements": ["specific recommendation to improve fit for ${jobRole}", "improvement 2", ...]
+      }
+    `;
+
+        try {
+            const client = getOpenAIClient();
+            const completion = await client.chat.completions.create({
+                model: 'google/gemini-2.0-flash-001',
+                messages: [
+                    { role: 'system', content: `You are an expert HR and Resume Analyzer specializing in ${jobRole || 'recruitment'}.` },
+                    { role: 'user', content: prompt },
+                ],
+                max_tokens: 2000,
+                response_format: { type: 'json_object' },
+            });
+
+            const aiResponse = completion.choices[0].message.content;
+            console.log('AI Response Received');
+            const analysisData = JSON.parse(aiResponse || '{}');
+
+            // 6. DB Saving
+            console.log('Saving to DB...');
+            await dbConnect();
+            const newResume = await Resume.create({
+                userId: (session.user as any).id,
+                fileName: file.name,
+                parsedContent: pdfText,
+                analysisResult: analysisData,
+            });
+            console.log('Saved to DB:', newResume._id);
+
+            return NextResponse.json({
+                message: 'Analysis successful',
+                data: newResume,
+            }, { status: 200 });
+
+        } catch (aiError: any) {
+            console.error('OpenAI API Error:', aiError);
+            return NextResponse.json({ message: 'AI Analysis Failed: ' + (aiError.message || 'Unknown error') }, { status: 503 });
+        }
+
+    } catch (error: any) {
+        console.error('Fatal Analysis Error:', error);
+        return NextResponse.json(
+            { message: 'Internal Server Error: ' + (error.message || 'Unknown') },
+            { status: 500 }
+        );
+    }
+}
