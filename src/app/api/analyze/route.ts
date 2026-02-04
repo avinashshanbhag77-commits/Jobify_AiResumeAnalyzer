@@ -3,12 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Resume from '@/models/Resume';
-// pdf-parse removed in favor of pdfjs-dist
 import OpenAI from 'openai';
-import * as pdfjs from 'pdfjs-dist';
-
-// Configure pdfjs worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+import pdf from 'pdf-parse';
 
 // Lazy initialization prevents top-level crashes if env vars are missing/invalid on module load
 let openai: OpenAI | null = null;
@@ -67,35 +63,9 @@ export async function POST(req: Request) {
         // 4. PDF Parsing
         let pdfText = '';
         try {
-            console.log('Parsing PDF with pdfjs-dist...');
-
-            const data = new Uint8Array(buffer);
-            // In pdfjs-dist 4.x, the getDocument call is straightforward
-            const loadingTask = pdfjs.getDocument({
-                data: data,
-                useWorkerFetch: false,
-                isEvalSupported: false,
-                useSystemFonts: true,
-                disableRange: true,
-                disableStream: true
-            });
-
-            const pdf = await loadingTask.promise;
-            console.log(`PDF loaded. Pages: ${pdf.numPages}`);
-
-            let textItems: string[] = [];
-
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items
-                    .map((item: any) => item.str)
-                    .join(' ');
-                textItems.push(pageText);
-                console.log(`Page ${i} parsed.`);
-            }
-
-            pdfText = textItems.join('\n');
+            console.log('Parsing PDF with pdf-parse...');
+            const data = await pdf(buffer);
+            pdfText = data.text;
             console.log('PDF Parsed successfully. Total length:', pdfText.length);
 
             if (!pdfText.trim()) {
