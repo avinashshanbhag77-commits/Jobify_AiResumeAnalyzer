@@ -14,34 +14,50 @@ export default function SignIn() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (status === 'authenticated' || session?.user) {
-            console.log("Active session detected. Forcing redirect to Dashboard...");
-            window.location.replace('/dashboard');
+        // Extract error from URL if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlError = urlParams.get('error');
+        if (urlError) {
+            setError(urlError);
         }
-    }, [status, session]);
+    }, []);
+
+    useEffect(() => {
+        if (status === 'authenticated' || (session as any)?.user) {
+            console.log("Active session detected. Redirecting to Dashboard...");
+            router.replace('/dashboard');
+            // Fallback for immediate redirect if router is slow
+            const timer = setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [status, session, router]);
 
     if (status === 'loading') {
-        return <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
-            <h2>Syncing Session...</h2>
-            <div className="loader"></div>
-        </div>;
-    }
-
-    if (status === 'authenticated' || session?.user) {
         return (
             <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
-                <h1 className="text-accent">Welcome Back!</h1>
-                <p style={{ marginTop: '1rem', fontSize: '1.2rem' }}>You are currently signed in.</p>
+                <h2>Synchronizing Session...</h2>
+                <div className="loader" style={{ marginTop: '2rem' }}></div>
+            </div>
+        );
+    }
+
+    if (status === 'authenticated' || (session as any)?.user) {
+        return (
+            <div className="container" style={{ paddingTop: '10rem', textAlign: 'center' }}>
+                <h1 className="text-accent">Accessing Your Dashboard</h1>
+                <p style={{ marginTop: '1rem', fontSize: '1.2rem' }}>You're already signed in. Taking you there now...</p>
+                <div className="loader" style={{ marginTop: '2.5rem' }}></div>
                 <div style={{ marginTop: '2.5rem' }}>
                     <button
                         onClick={() => window.location.href = '/dashboard'}
                         className="btn-primary"
-                        style={{ padding: '1rem 3rem', fontSize: '1.2rem', cursor: 'pointer' }}
+                        style={{ padding: '1rem 3rem' }}
                     >
-                        Enter My Dashboard (Force Load)
+                        Click here if not redirected
                     </button>
                 </div>
-                <p style={{ marginTop: '2rem', color: '#666' }}>Redirecting automatically...</p>
             </div>
         );
     }
@@ -53,14 +69,16 @@ export default function SignIn() {
 
         try {
             const result = await signIn('credentials', {
-                email: data.email,
+                email: data.email.trim(),
                 password: data.password,
                 callbackUrl: '/dashboard',
-                redirect: true, // Let NextAuth handle the redirect
+                redirect: false, // Handle redirect manually for better error control
             });
 
             if (result?.error) {
-                setError('Invalid email or password');
+                setError(result.error);
+            } else if (result?.url) {
+                router.replace(result.url);
             }
         } catch (err: any) {
             setError('Something went wrong. Please try again.');

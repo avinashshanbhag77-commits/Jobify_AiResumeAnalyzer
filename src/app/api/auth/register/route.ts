@@ -14,9 +14,10 @@ export async function POST(req: Request) {
             );
         }
 
+        const normalizedEmail = email.toLowerCase().trim();
         await dbConnect();
 
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email: normalizedEmail });
 
         if (existingUser) {
             return NextResponse.json(
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await User.create({
-            email,
+            email: normalizedEmail,
             password: hashedPassword,
             name,
         });

@@ -20,12 +20,13 @@ export const authOptions: NextAuthOptions = {
                 try {
                     console.log("Attempting DB connection...");
                     await dbConnect();
-                    console.log("DB Connected. finding user:", credentials.email);
+                    const email = credentials.email.toLowerCase().trim();
+                    console.log("DB Connected. finding user:", email);
 
-                    const user = await User.findOne({ email: credentials.email });
+                    const user = await User.findOne({ email });
 
                     if (!user || !user.password) {
-                        console.log("User not found or no password");
+                        console.log("User not found or no password for:", email);
                         throw new Error('No user found with this email');
                     }
 

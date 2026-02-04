@@ -105,16 +105,21 @@ export default function UploadForm({ onAnalysisComplete }: UploadFormProps) {
                         width: '100%',
                         padding: '0.75rem',
                         borderRadius: '8px',
-                        background: 'var(--glass)',
+                        background: '#1a1a1a', // Solid dark background
                         border: '1px solid var(--glass-border)',
                         color: 'white',
                         outline: 'none',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 0.75rem center',
+                        backgroundSize: '1rem'
                     }}
                 >
-                    <option value="">-- Choose a Role --</option>
+                    <option value="" style={{ background: '#1a1a1a' }}>-- Choose a Role --</option>
                     {roles.map((role) => (
-                        <option key={role} value={role}>{role}</option>
+                        <option key={role} value={role} style={{ background: '#1a1a1a' }}>{role}</option>
                     ))}
                 </select>
             </div>

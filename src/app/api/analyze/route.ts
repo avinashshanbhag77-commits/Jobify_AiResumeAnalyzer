@@ -3,8 +3,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Resume from '@/models/Resume';
-const pdfParse = require('pdf-parse');
+// pdf-parse removed in favor of pdfjs-dist
 import OpenAI from 'openai';
+import * as pdfjs from 'pdfjs-dist';
+
+// Configure pdfjs worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
 // Lazy initialization prevents top-level crashes if env vars are missing/invalid on module load
 let openai: OpenAI | null = null;
@@ -63,13 +67,45 @@ export async function POST(req: Request) {
         // 4. PDF Parsing
         let pdfText = '';
         try {
-            console.log('Parsing PDF...');
-            const data = await pdfParse(buffer);
-            pdfText = data.text;
-            console.log('PDF Parsed. Length:', pdfText.length);
-        } catch (error) {
+            console.log('Parsing PDF with pdfjs-dist...');
+
+            const data = new Uint8Array(buffer);
+            // In pdfjs-dist 4.x, the getDocument call is straightforward
+            const loadingTask = pdfjs.getDocument({
+                data: data,
+                useWorkerFetch: false,
+                isEvalSupported: false,
+                useSystemFonts: true,
+                disableRange: true,
+                disableStream: true
+            });
+
+            const pdf = await loadingTask.promise;
+            console.log(`PDF loaded. Pages: ${pdf.numPages}`);
+
+            let textItems: string[] = [];
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items
+                    .map((item: any) => item.str)
+                    .join(' ');
+                textItems.push(pageText);
+                console.log(`Page ${i} parsed.`);
+            }
+
+            pdfText = textItems.join('\n');
+            console.log('PDF Parsed successfully. Total length:', pdfText.length);
+
+            if (!pdfText.trim()) {
+                throw new Error('No text content found in PDF');
+            }
+        } catch (error: any) {
             console.error('PDF Parse Error:', error);
-            return NextResponse.json({ message: 'Failed to parse PDF file. Is it a valid PDF?' }, { status: 500 });
+            return NextResponse.json({
+                message: 'Failed to parse PDF file. This may be due to a corrupted PDF or server configuration: ' + (error.message || 'Unknown error')
+            }, { status: 500 });
         }
 
         // 5. AI Analysis
@@ -78,24 +114,25 @@ export async function POST(req: Request) {
       Analyze the following resume content specifically for the role of "${jobRole || 'General Professional'}".
       
       Resume Content:
-      ${pdfText.substring(0, 3000)} // Truncate to avoid token limits
+      ${pdfText.substring(0, 4000)} // Increased limit slightly
 
       Return the response in strictly valid JSON format with the following structure:
       {
-        "score": number (0-100) - evaluate how well the candidate matches the ${jobRole} position,
-        "summary": "Professional summary of the candidate and their fit for the ${jobRole} role (max 3 sentences)",
-        "strengths": ["strength 1 relevant to ${jobRole}", "strength 2", ...],
-        "weaknesses": ["missing skills/experience for ${jobRole}", "weakness 2", ...],
-        "improvements": ["specific recommendation to improve fit for ${jobRole}", "improvement 2", ...]
+        "score": number (0-100),
+        "summary": "Professional summary (max 3 sentences)",
+        "strengths": ["strength 1", "strength 2", ...],
+        "weaknesses": ["weakness 1", "weakness 2", ...],
+        "improvements": ["improvement 1", "improvement 2", ...]
       }
     `;
 
         try {
             const client = getOpenAIClient();
+            console.log('Sending request to OpenRouter/OpenAI...');
             const completion = await client.chat.completions.create({
                 model: 'google/gemini-2.0-flash-001',
                 messages: [
-                    { role: 'system', content: `You are an expert HR and Resume Analyzer specializing in ${jobRole || 'recruitment'}.` },
+                    { role: 'system', content: `You are an expert HR and Resume Analyzer specializing in ${jobRole || 'recruitment'}. Return ONLY valid JSON.` },
                     { role: 'user', content: prompt },
                 ],
                 max_tokens: 2000,
@@ -104,18 +141,26 @@ export async function POST(req: Request) {
 
             const aiResponse = completion.choices[0].message.content;
             console.log('AI Response Received');
-            const analysisData = JSON.parse(aiResponse || '{}');
+
+            let analysisData;
+            try {
+                analysisData = JSON.parse(aiResponse || '{}');
+            } catch (pErr) {
+                console.error('Failed to parse AI JSON response:', aiResponse);
+                throw new Error('Invalid JSON response from AI');
+            }
 
             // 6. DB Saving
-            console.log('Saving to DB...');
+            console.log('Connecting to DB...');
             await dbConnect();
+            console.log('Saving analysis result...');
             const newResume = await Resume.create({
                 userId: (session.user as any).id,
                 fileName: file.name,
                 parsedContent: pdfText,
                 analysisResult: analysisData,
             });
-            console.log('Saved to DB:', newResume._id);
+            console.log('Successfully saved to DB:', newResume._id);
 
             return NextResponse.json({
                 message: 'Analysis successful',
@@ -123,8 +168,10 @@ export async function POST(req: Request) {
             }, { status: 200 });
 
         } catch (aiError: any) {
-            console.error('OpenAI API Error:', aiError);
-            return NextResponse.json({ message: 'AI Analysis Failed: ' + (aiError.message || 'Unknown error') }, { status: 503 });
+            console.error('AI Analysis Error:', aiError);
+            return NextResponse.json({
+                message: 'AI Analysis Failed: ' + (aiError.message || 'Unknown error')
+            }, { status: 503 });
         }
 
     } catch (error: any) {
