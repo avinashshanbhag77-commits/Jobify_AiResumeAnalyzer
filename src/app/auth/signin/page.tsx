@@ -23,16 +23,12 @@ export default function SignIn() {
     }, []);
 
     useEffect(() => {
-        if (status === 'authenticated' || (session as any)?.user) {
-            console.log("Active session detected. Redirecting to Dashboard...");
-            router.replace('/dashboard');
-            // Fallback for immediate redirect if router is slow
-            const timer = setTimeout(() => {
-                window.location.href = '/dashboard';
-            }, 1000);
-            return () => clearTimeout(timer);
+        if (status === 'authenticated') {
+            console.log("Authentication successful. Transitioning to dashboard...");
+            // Use window.location for a cleaner session sync on some environments
+            window.location.href = '/dashboard';
         }
-    }, [status, session, router]);
+    }, [status]);
 
     if (status === 'loading') {
         return (

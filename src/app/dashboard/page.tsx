@@ -28,23 +28,16 @@ export default function Dashboard() {
 
     return (
         <div className="container" style={{ paddingBottom: '4rem', minHeight: '100vh', display: 'block' }}>
-            {status === 'loading' ? (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', background: 'rgba(10,10,10,0.8)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="loader" style={{ marginBottom: '1rem' }}></div>
-                    <p>Synchronizing Session...</p>
-                </div>
-            ) : null}
-
             <div className="dashboard-header" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ flex: 1, minWidth: '300px' }}>
                     <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome, {session?.user?.name || 'User'}</h1>
                     <p style={{ color: '#888' }}>Ready to optimize your career?</p>
                 </div>
-                {status === 'unauthenticated' && mounted && (
+                {status === 'unauthenticated' && (
                     <div className="card" style={{ padding: '1rem', border: '1px solid var(--error)', background: 'rgba(239, 68, 68, 0.1)', maxWidth: '400px' }}>
                         <p style={{ fontSize: '0.8rem', color: 'var(--error)' }}>
-                            Session not detected. If you just signed in, try
-                            <button onClick={() => window.location.reload()} style={{ marginLeft: '5px', textDecoration: 'underline', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}>refreshing</button> or <Link href="/auth/signin" style={{ textDecoration: 'underline' }}>signing in again</Link>.
+                            Session synchronization issue.
+                            <button onClick={() => window.location.href = '/auth/signin'} style={{ marginLeft: '5px', textDecoration: 'underline', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}>Sign in again</button>
                         </p>
                     </div>
                 )}
