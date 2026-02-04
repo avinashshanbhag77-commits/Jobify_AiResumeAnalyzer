@@ -50,49 +50,56 @@ export default function Register() {
     };
 
     return (
-        <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-            <div className="card" style={{ maxWidth: '400px', width: '100%' }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Create Account</h2>
+        <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', paddingTop: '100px' }}>
+            <div className="glass-panel" style={{ maxWidth: '440px', width: '100%', padding: '3rem' }}>
+                <h2 className="text-gradient" style={{ textAlign: 'center', marginBottom: '2.5rem', fontSize: '2rem' }}>Create Account</h2>
                 <form onSubmit={registerUser}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
+                    <div className="form-group">
+                        <label className="form-label">Full Name</label>
                         <input
                             type="text"
                             required
+                            placeholder="John Doe"
                             value={data.name}
                             onChange={(e) => setData({ ...data, name: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #333', background: '#222', color: '#fff' }}
+                            className="form-input"
                         />
                     </div>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Email</label>
+                    <div className="form-group">
+                        <label className="form-label">Email Address</label>
                         <input
                             type="email"
                             required
+                            placeholder="john@example.com"
                             value={data.email}
                             onChange={(e) => setData({ ...data, email: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #333', background: '#222', color: '#fff' }}
+                            className="form-input"
                         />
                     </div>
-                    <div style={{ marginBottom: '2rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Password</label>
+                    <div className="form-group" style={{ marginBottom: '2.5rem' }}>
+                        <label className="form-label">Password</label>
                         <input
                             type="password"
                             required
+                            placeholder="••••••••"
                             value={data.password}
                             onChange={(e) => setData({ ...data, password: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #333', background: '#222', color: '#fff' }}
+                            className="form-input"
                         />
                     </div>
 
-                    {error && <p className="text-error" style={{ marginBottom: '1rem', textAlign: 'center' }}>{error}</p>}
+                    {error && (
+                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.5rem', color: 'var(--error)', fontSize: '0.875rem', textAlign: 'center' }}>
+                            {error}
+                        </div>
+                    )}
 
-                    <button type="submit" className="btn-primary" style={{ width: '100%' }} disabled={loading}>
-                        {loading ? <Loader2 className="animate-spin" /> : 'Register'}
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem' }} disabled={loading}>
+                        {loading ? <Loader2 className="animate-spin" /> : 'Create Account'}
                     </button>
                 </form>
-                <p style={{ marginTop: '1rem', textAlign: 'center', color: '#888' }}>
-                    Already have an account? <Link href="/auth/signin" className="text-accent">Sign In</Link>
+                <p style={{ marginTop: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.9375rem' }}>
+                    Already have an account? <Link href="/auth/signin" className="text-primary" style={{ fontWeight: '600' }}>Sign In</Link>
                 </p>
             </div>
         </div>

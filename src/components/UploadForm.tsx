@@ -90,36 +90,23 @@ export default function UploadForm({ onAnalysisComplete }: UploadFormProps) {
     };
 
     return (
-        <div className="card" style={{ maxWidth: '600px', margin: '0 auto 2rem' }}>
-            <h2 style={{ marginBottom: '1rem', textAlign: 'center' }}>Analyze Your Resume</h2>
+        <div className="glass-panel" style={{ maxWidth: '640px', margin: '0 auto 2rem', padding: '3rem' }}>
+            <h2 className="text-gradient" style={{ marginBottom: '2rem', textAlign: 'center', fontSize: '2rem' }}>Analyze Your Resume</h2>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="jobRole" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#ccc' }}>
+            <div className="form-group" style={{ marginBottom: '2rem' }}>
+                <label className="form-label" style={{ fontSize: '0.9375rem', fontWeight: '600' }}>
                     Select Target Job Role
                 </label>
                 <select
                     id="jobRole"
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderRadius: '8px',
-                        background: '#1a1a1a', // Solid dark background
-                        border: '1px solid var(--glass-border)',
-                        color: 'white',
-                        outline: 'none',
-                        cursor: 'pointer',
-                        appearance: 'none',
-                        backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 0.75rem center',
-                        backgroundSize: '1rem'
-                    }}
+                    className="form-input form-select"
+                    style={{ backgroundPosition: 'right 1rem center' }}
                 >
-                    <option value="" style={{ background: '#1a1a1a' }}>-- Choose a Role --</option>
+                    <option value="">-- Choose a Role --</option>
                     {roles.map((role) => (
-                        <option key={role} value={role} style={{ background: '#1a1a1a' }}>{role}</option>
+                        <option key={role} value={role}>{role}</option>
                     ))}
                 </select>
             </div>
@@ -130,27 +117,36 @@ export default function UploadForm({ onAnalysisComplete }: UploadFormProps) {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                style={{ padding: '2rem' }} // Reduced padding
+                style={{
+                    padding: '3.5rem 2rem',
+                    background: isDragOver ? 'rgba(99, 102, 241, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                    border: '2px dashed var(--glass-border)',
+                    borderRadius: '16px',
+                    transition: 'all 0.3s ease'
+                }}
             >
                 <input
                     type="file"
                     ref={fileInputRef}
                     accept="application/pdf"
                     onChange={handleChange}
+                    style={{ display: 'none' }}
                 />
 
                 {isLoading ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                        <Loader2 className="animate-spin text-accent" size={32} />
-                        <p style={{ fontSize: '0.9rem' }}>Analyzing for {selectedRole}...</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                        <Loader2 className="animate-spin text-primary" size={40} />
+                        <p style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--primary)' }}>Analyzing for {selectedRole}...</p>
                     </div>
                 ) : (
                     <>
-                        <Upload size={32} className="text-secondary" style={{ margin: '0 auto 0.5rem', display: 'block' }} />
-                        <p style={{ fontWeight: 500, fontSize: '0.9rem', marginBottom: '0.25rem' }}>
-                            {selectedRole ? 'Click to upload your resume' : 'Select a role first'}
+                        <div className="feature-icon" style={{ margin: '0 auto 1.5rem', width: '64px', height: '64px' }}>
+                            <Upload size={32} />
+                        </div>
+                        <p style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '0.5rem', color: 'white' }}>
+                            {selectedRole ? 'Click or drop your resume' : 'Select a role first'}
                         </p>
-                        <p style={{ fontSize: '0.75rem', color: '#666' }}>PDF only (Max 5MB)</p>
+                        <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>Professional PDF resumes only (Max 5MB)</p>
                     </>
                 )}
             </div>
