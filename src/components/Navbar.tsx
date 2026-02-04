@@ -35,8 +35,8 @@ export default function Navbar() {
                             </button>
                         </>
                     ) : (
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <Link href="/auth/signin" className="nav-link" style={{ marginTop: '0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <Link href="/auth/signin" className="nav-link">
                                 Sign In
                             </Link>
                             <Link href="/auth/register" className="btn btn-primary">

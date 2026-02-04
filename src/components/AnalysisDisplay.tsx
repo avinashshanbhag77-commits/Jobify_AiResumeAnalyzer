@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
 
 interface AnalysisDisplayProps {
     data: any;
@@ -14,6 +14,15 @@ export default function AnalysisDisplay({ data }: AnalysisDisplayProps) {
 
     return (
         <div className="analysis-result">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }} className="no-print">
+                <button
+                    onClick={() => window.print()}
+                    className="btn btn-secondary"
+                    style={{ gap: '0.5rem' }}
+                >
+                    <Download size={18} /> Download as PDF
+                </button>
+            </div>
             <div className="glass-panel" style={{ padding: '3rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', marginBottom: '3rem' }}>
                     <div
