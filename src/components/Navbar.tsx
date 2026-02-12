@@ -18,6 +18,7 @@ export default function Navbar() {
                 </Link>
 
                 <div className={`nav-links ${isOpen ? 'active' : ''}`}>
+                    <Link href="/jobs" className="nav-link" onClick={() => setIsOpen(false)}>Jobs</Link>
                     <Link href="/" className="nav-link" onClick={() => setIsOpen(false)}>Home</Link>
                     {session?.user ? (
                         <>
